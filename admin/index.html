@@ -50,7 +50,8 @@
 
   <div class="card" style="padding:6px">
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('profile',this)">🎀 프로필</button>
+      <button class="tab-btn active" onclick="switchTab('main',this)">🏠 메인</button>
+      <button class="tab-btn" onclick="switchTab('profile',this)">🎀 프로필</button>
       <button class="tab-btn" onclick="switchTab('schedule',this)">📅 일정</button>
       <button class="tab-btn" onclick="switchTab('work',this)">⚡ 업보</button>
       <button class="tab-btn" onclick="switchTab('dress',this)">👗 옷장</button>
@@ -59,7 +60,24 @@
   </div>
 
   <!-- 프로필 탭 -->
-  <div class="tab-panel active" id="tab-profile">
+  <div class="tab-panel active" id="tab-main">
+    <div class="card">
+      <div class="card-title">🏠 메인화면 커버</div>
+      <div class="form-field"><label class="input-label">부제 (제목 아래 한 줄)</label><input class="input" id="f-main-sub" type="text" placeholder="예: 개굴개굴 스트리머 moa"></div>
+      <div class="form-field"><label class="input-label">소개 문구 (줄바꿈=엔터)</label><textarea class="input" id="f-main-desc" rows="4"></textarea></div>
+      <div class="form-field"><label class="input-label">배지 문구 (히어로 하단 알약)</label><input class="input" id="f-main-badge" type="text" placeholder="예: 오늘도 개굴개굴 행복하개!"></div>
+      <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="saveLocalProfile()">저장 ♥</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">ℹ️ 참고</div>
+      <div style="font-size:13px;color:var(--text-soft);line-height:1.85">
+        · <b>이름</b>과 <b>이번 주 방송요일</b>은 <b>프로필 탭</b>에서 수정하면 메인에도 같이 반영돼요.<br>
+        · 커버 캐릭터 이미지(char.jpg)는 레포 파일 교체로 바꿔요.
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-profile">
     <div class="card">
       <div class="card-title">🖼 프로필 사진</div>
       <div class="form-field">
@@ -347,6 +365,7 @@
 
   const profileKeys = [
     'avatar','soop-id',
+    'main-sub','main-desc','main-badge',
     'info-name','info-reading','info-catchphrase','info-tags','info-fandom',
     'info-gender','info-debut','info-birth','info-sing','info-item',
     'stat-smart','stat-tension','stat-hit','stat-cute',
@@ -472,21 +491,6 @@
   }
 
   // ── 공지 ──
-  async function loadNotice() {
-    const data = await fetchAll('notice', { order: 'created_at', asc: false });
-    const t = document.getElementById('noti-list');
-    if (!data.length) { t.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#ccc;padding:20px">없음</td></tr>'; return; }
-    t.innerHTML = data.map(n => `<tr><td>${n.title}</td><td>${n.pinned?'📌':'-'}</td><td>${new Date(n.created_at).toLocaleDateString()}</td><td><button class="delete-btn" onclick="del('notice',${n.id},loadNotice)">🗑</button></td></tr>`).join('');
-  }
-  async function addNotice() {
-    const title = document.getElementById('noti-title').value.trim();
-    if (!title) { showToast('❗ 제목 필수!'); return; }
-    const images = document.getElementById('noti-image-url').value.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
-    const image_url = images[0] || null;
-    const ok = await insertRow('notice', { title, content: document.getElementById('noti-content').value, pinned: document.getElementById('noti-pin').checked, image_url, images });
-    if (ok) { showToast('✅ 추가!'); ['noti-title','noti-content','noti-image-url'].forEach(id=>document.getElementById(id).value=''); document.getElementById('noti-pin').checked=false; loadNotice(); }
-    else showToast('❌ 실패');
-  }
 
   // ── 일정 ──
   async function loadSchedule() {
@@ -659,21 +663,6 @@
   }
 
   // ── 일기 ──
-  async function loadDiary() {
-    const data = await fetchAll('diary', { order: 'diary_date', asc: false });
-    const t = document.getElementById('diary-list');
-    if (!data.length) { t.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#ccc;padding:20px">없음</td></tr>'; return; }
-    t.innerHTML = data.map(d => `<tr><td>${d.diary_date||'-'}</td><td>${d.mood}</td><td>${d.title}</td><td><button class="delete-btn" onclick="del('diary',${d.id},loadDiary)">🗑</button></td></tr>`).join('');
-  }
-  async function addDiary() {
-    const title = document.getElementById('diary-title').value.trim();
-    if (!title) { showToast('❗ 제목 필수!'); return; }
-    const images = document.getElementById('diary-image-url').value.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
-    const image_url = images[0] || null;
-    const ok = await insertRow('diary', { title, content: document.getElementById('diary-content').value, mood: document.getElementById('diary-mood').value, diary_date: document.getElementById('diary-date').value, image_url, images });
-    if (ok) { showToast('✅ 추가!'); ['diary-title','diary-content','diary-date','diary-image-url'].forEach(id=>document.getElementById(id).value=''); loadDiary(); }
-    else showToast('❌ 실패');
-  }
 
   async function del(table, id, fn) {
     if (!confirm('정말 삭제?')) return;
@@ -683,10 +672,6 @@
 
   // ── 노래 ──
   let songData = [];
-  async function loadSong() {
-    songData = await fetchAll('songs', { order: 'id', asc: true });
-    renderSongs();
-  }
   function renderSongs() {
     const q = (document.getElementById('song-search')?.value || '').trim().toLowerCase();
     const list = songData.filter(s => !q || (s.title||'').toLowerCase().includes(q) || (s.artist||'').toLowerCase().includes(q));
@@ -696,15 +681,6 @@
       const d = parseInt(s.difficulty)||0; let stars=''; for(let k=1;k<=d;k++) stars+='⭐';
       return `<tr><td>${s.title}</td><td>${s.artist||'-'}</td><td><span class="badge badge-pink">${s.genre||'기타'}</span></td><td>${stars||'-'}</td><td><button class="delete-btn" onclick="del('songs',${s.id},loadSong)">🗑</button></td></tr>`;
     }).join('');
-  }
-  async function addSong() {
-    const title = document.getElementById('song-title').value.trim();
-    if (!title) { showToast('❗ 제목 필수!'); return; }
-    let diff = parseInt(document.getElementById('song-diff').value)||3;
-    diff = Math.min(5, Math.max(1, diff));
-    const ok = await insertRow('songs', { title, artist: document.getElementById('song-artist').value.trim(), genre: document.getElementById('song-genre').value, difficulty: diff });
-    if (ok) { showToast('✅ 추가!'); document.getElementById('song-title').value=''; document.getElementById('song-artist').value=''; loadSong(); }
-    else showToast('❌ 실패');
   }
 
   // ── 문의 ──

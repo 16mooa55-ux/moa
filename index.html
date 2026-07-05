@@ -190,16 +190,16 @@
     <button class="dk" id="dk" type="button" aria-label="다크모드"><span class="knob" id="dkKnob">🌙</span></button>
   </header>
   <div class="rule"></div>
-  <div class="issue"><span><b>VOL.01</b></span><span>개굴개굴 스트리머</span><span class="dday" id="dday">2026 SPRING</span></div>
+  <div class="issue"><span>개굴개굴 스트리머</span><span class="dday" id="dday">2026 SPRING</span></div>
 
   <!-- 커버 스토리 -->
   <section class="feature">
     <div class="feat-text">
       <div class="kicker">Cover Story · 이번 호 주인공</div>
       <h1 class="title" id="info-name">모아<span class="heart">♥</span></h1>
-      <div class="sub"><span class="s">✦</span> 개굴개굴 스트리머 moa <span class="s">♥</span></div>
-      <p class="desc" id="info-catchphrase">앙녕항셍용 몽앙잉닝당! 🐸<br>게임하고 수다떨고 가끔 노래도 부르는 개구리 버튜버예요.<br>꾸물이들 언제든 놀러와요 💚</p>
-      <div class="badge"><span class="dot"></span> 오늘도 개굴개굴 행복하개! ✦</div>
+      <div class="sub"><span class="s">✦</span> <span id="main-sub">개굴개굴 스트리머 moa</span> <span class="s">♥</span></div>
+      <p class="desc" id="main-desc">앙녕항셍용 몽앙잉닝당! 🐸<br>게임하고 수다떨고 가끔 노래도 부르는 개구리 버튜버예요.<br>꾸물이들 언제든 놀러와요 💚</p>
+      <div class="badge"><span class="dot"></span> <span id="main-badge">오늘도 개굴개굴 행복하개!</span> ✦</div>
       <div class="cta">
         <a href="https://www.sooplive.com/station/kimghdus" target="_blank" rel="noopener">SOOP 방송국 →</a>
         <a href="#" onclick="openInquiry();return false;">문의하기 ♥</a>
@@ -209,7 +209,6 @@
       <figure class="frame">
         <div class="ph">🐸<span>이미지 자리</span></div>
         <img src="char.jpg" alt="모아" referrerpolicy="no-referrer" onerror="this.style.display='none'">
-        <span class="vol">VOL.01</span>
       </figure>
       <div class="cap">🐸 moa ♥</div>
     </div>
@@ -232,7 +231,7 @@
     </div>
   </section>
 
-  <div class="colophon">MOA MAGAZINE · VOL.01 &nbsp;—&nbsp; © 2026 모아 (moa) Official · 비즈니스 문의는 문의 버튼을 이용해 주세요</div>
+  <div class="colophon">MOA MAGAZINE &nbsp;—&nbsp; © 2026 모아 (moa) Official · 비즈니스 문의는 문의 버튼을 이용해 주세요</div>
 
 </div>
 
@@ -269,7 +268,9 @@
 
     // 이름 / 소개
     if (d['info-name']) { const el=document.getElementById('info-name'); if(el) el.innerHTML = esc(d['info-name']).replace(/\?+$/,'')+'<span class="heart">♥</span>'; }
-    if (d['info-catchphrase']) { const el=document.getElementById('info-catchphrase'); if(el) el.innerHTML = esc(d['info-catchphrase']).replace(/\n/g,'<br>'); }
+    if (d['main-desc']) { const el=document.getElementById('main-desc'); if(el) el.innerHTML = esc(d['main-desc']).replace(/\n/g,'<br>'); }
+    if (d['main-sub']) { const el=document.getElementById('main-sub'); if(el) el.textContent = d['main-sub']; }
+    if (d['main-badge']) { const el=document.getElementById('main-badge'); if(el) el.textContent = d['main-badge']; }
 
     // 이번 주 일정 (days CSV: 0=일 ~ 6=토)
     const days = (d.days||'').split(',').map(x=>x.trim()).filter(Boolean);
