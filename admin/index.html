@@ -262,6 +262,9 @@
       .cbtn { width:26px; height:26px; border-radius:50%; border:1.5px solid var(--main-light); background:#fff; color:var(--main-dark); font-weight:700; cursor:pointer; font-size:14px; line-height:1; }
       .cbtn:hover { background:var(--main); color:#fff; }
       .cval { min-width:26px; text-align:center; font-weight:800; color:var(--main-dark); }
+      .cval-input { width:58px; text-align:center; font-weight:800; color:var(--main-dark); font-size:14px; border:1.5px solid var(--main-light); border-radius:8px; padding:5px 4px; outline:none; background:#fff; -moz-appearance:textfield; }
+      .cval-input:focus { border-color:var(--main); background:var(--main-light); }
+      .cval-input::-webkit-outer-spin-button, .cval-input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
       .type-row { display:flex; align-items:center; gap:8px; padding:10px 14px; background:#fff; border:1px solid var(--main-light); border-radius:10px; margin-bottom:7px; }
       .type-cat { font-size:10px; font-weight:700; padding:2px 9px; border-radius:999px; }
       .type-cat.일반 { background:var(--main-light); color:var(--main-dark); }
@@ -580,13 +583,18 @@
       <div class="counter">
         <span class="cn">${t.name}${t.category==='이벤트'?'<span class="evt">이벤트</span>':''}</span>
         <button class="cbtn" onclick="bump(${t.id},-1)">−</button>
-        <span class="cval" id="cv-${t.id}">${editCounts[t.id]||0}</span>
+        <input class="cval-input" id="cv-${t.id}" type="number" min="0" inputmode="numeric" value="${editCounts[t.id]||0}" oninput="setCount(${t.id},this.value)">
         <button class="cbtn" onclick="bump(${t.id},1)">+</button>
       </div>`).join('');
   }
   function bump(tid, d) {
     editCounts[tid] = Math.max(0, (editCounts[tid]||0) + d);
-    document.getElementById('cv-'+tid).textContent = editCounts[tid];
+    const el = document.getElementById('cv-'+tid);
+    if (el) el.value = editCounts[tid];
+  }
+  function setCount(tid, val) {
+    let n = parseInt(val, 10); if (isNaN(n) || n < 0) n = 0;
+    editCounts[tid] = n;
   }
   async function saveCounts() {
     if (!currentViewer) return;
