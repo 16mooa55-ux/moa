@@ -63,6 +63,7 @@
   <div class="tab-panel active" id="tab-main">
     <div class="card">
       <div class="card-title">🏠 메인화면 커버</div>
+      <div class="form-field"><label class="input-label">커버 이미지 URL (비우면 기본 char.jpg)</label><input class="input" id="f-main-art" type="url" placeholder="https://.../image.png"></div>
       <div class="form-field"><label class="input-label">부제 (제목 아래 한 줄)</label><input class="input" id="f-main-sub" type="text" placeholder="예: 개굴개굴 스트리머 moa"></div>
       <div class="form-field"><label class="input-label">소개 문구 (줄바꿈=엔터)</label><textarea class="input" id="f-main-desc" rows="4"></textarea></div>
       <div class="form-field"><label class="input-label">배지 문구 (히어로 하단 알약)</label><input class="input" id="f-main-badge" type="text" placeholder="예: 오늘도 개굴개굴 행복하개!"></div>
@@ -71,8 +72,8 @@
     <div class="card">
       <div class="card-title">ℹ️ 참고</div>
       <div style="font-size:13px;color:var(--text-soft);line-height:1.85">
-        · <b>이름</b>과 <b>이번 주 방송요일</b>은 <b>프로필 탭</b>에서 수정하면 메인에도 같이 반영돼요.<br>
-        · 커버 캐릭터 이미지(char.jpg)는 레포 파일 교체로 바꿔요.
+        · <b>이름·팬닉</b>과 <b>이번 주 방송요일</b>은 <b>프로필 탭</b>에서 수정하면 메인에도 같이 반영돼요.<br>
+        · 이미지는 전부 <b>URL(링크)</b>로 바꿔요 — 커버는 위 칸, 프사·팬캐릭터는 프로필 탭.
       </div>
     </div>
   </div>
@@ -97,6 +98,11 @@
         <span style="font-size:12px;color:var(--text-soft)">← 실제로 표시될 프사 미리보기</span>
         <button class="btn btn-primary" style="margin-left:auto" onclick="saveLocalProfile()">저장 ♥</button>
       </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🐸 팬캐릭터 이미지</div>
+      <div class="form-field"><label class="input-label">팬캐릭터 이미지 URL (비우면 기본 fan.png)</label><input class="input" id="f-fan-char" type="url" placeholder="https://.../fan.png"></div>
+      <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="saveLocalProfile()">저장 ♥</button></div>
     </div>
     <div class="card">
       <div class="card-title">모아 특징</div>
@@ -365,7 +371,7 @@
 
   const profileKeys = [
     'avatar','soop-id',
-    'main-sub','main-desc','main-badge',
+    'main-sub','main-desc','main-badge','main-art','fan-char',
     'info-name','info-reading','info-catchphrase','info-tags','info-fandom',
     'info-gender','info-debut','info-birth','info-sing','info-item',
     'stat-smart','stat-tension','stat-hit','stat-cute',

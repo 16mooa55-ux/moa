@@ -315,8 +315,8 @@
     <section class="art fancard">
       <h3>🐸 팬캐릭터</h3>
       <div class="fanchar">
-        <img src="../fan.png" alt="꾸물이" referrerpolicy="no-referrer">
-        <div class="fanchar-name">🐸 꾸물이 🐸</div>
+        <img id="fan-char-img" src="../fan.png" alt="꾸물이" referrerpolicy="no-referrer">
+        <div class="fanchar-name">🐸 <span id="fan-name">꾸물이</span> 🐸</div>
       </div>
     </section>
 
@@ -383,7 +383,7 @@
   // 기본값 (DB가 비어도 모아 정보가 뜨도록. admin 저장 시 이 값들을 덮어씀)
   const defaults = {
     'soop-id':'kimghdus', avatar:'',
-    'info-name':'모아', 'info-reading':'모아 / moa', 'info-fandom':'꾸물이',
+    'info-name':'모아', 'info-reading':'모아 / moa', 'info-fandom':'꾸물이', 'main-art':'', 'fan-char':'',
     'info-catchphrase':'앙녕항셍용 몽앙잉닝당! 🐸 게임하고 수다떨고 가끔 노래도 부르는 개구리 버튜버예요. 꾸물이들 언제든 놀러와요 💚',
     'info-gender':'여자', 'info-debut':'2026.01.13', 'info-birth':'11월 28일',
     'info-sing':'가끔 함 🎤', 'info-item':'개구리삔 🐸',
@@ -425,6 +425,8 @@
     setTxt('info-reading', d['info-reading']);
     setTxt('info-fandom', d['info-fandom']);
     setTxt('pf-fandom', d['info-fandom']);
+    setTxt('fan-name', d['info-fandom']);
+    if (d['fan-char']) { const el=document.getElementById('fan-char-img'); if(el) el.src=d['fan-char']; }
     { const el=document.getElementById('info-catchphrase'); if(el) el.innerHTML = esc(d['info-catchphrase']).replace(/\n/g,'<br>'); }
     setTxt('pf-gender', d['info-gender']);
     setTxt('pf-debut', d['info-debut']);
