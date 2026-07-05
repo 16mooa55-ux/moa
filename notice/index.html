@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>모아 · 공지</title>
+<link rel="icon" type="image/jpeg" href="https://profile.img.sooplive.co.kr/LOGO/ki/kimghdus/kimghdus.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<style>
+  .notice-list{ display:flex; flex-direction:column; gap:10px; }
+  .notice-item{ background:#f7fdf5; border:2px solid #a9dca0; border-radius:16px; padding:18px 22px; cursor:pointer; transition:box-shadow .2s, transform .2s; }
+  .notice-item:hover{ box-shadow:var(--shadow-hover); transform:translateY(-2px); }
+  .notice-item.pinned{ border-left:5px solid var(--main); background:var(--main-light); }
+  .notice-header{ display:flex; align-items:center; gap:10px; }
+  .notice-pin{ font-size:11px; background:var(--main); color:#fff; padding:3px 11px; border-radius:999px; font-weight:700; font-family:var(--round); white-space:nowrap; }
+  .notice-title{ font-size:15px; font-weight:700; color:var(--text); flex:1; }
+  .notice-thumb{ width:40px; height:40px; border-radius:10px; object-fit:cover; border:1px solid var(--main-light); flex-shrink:0; }
+  .notice-date{ font-size:12px; color:var(--text-soft); font-family:var(--round); white-space:nowrap; }
+  .notice-arrow{ color:var(--main); font-size:18px; transition:transform .2s; }
+  .notice-item.open .notice-arrow{ transform:rotate(90deg); }
+  .notice-content{ font-size:14px; color:var(--text-mid); line-height:1.85; max-height:0; overflow:hidden; transition:max-height .3s; white-space:pre-wrap; }
+  .notice-item.open .notice-content{ max-height:3000px; margin-top:14px; padding-top:14px; border-top:1px dashed var(--main-light); }
+  .notice-count{ font-family:var(--round); font-size:14px; color:var(--main-deep); margin-bottom:12px; }
+  .post-img{ display:block; max-width:100%; border-radius:12px; margin-bottom:12px; border:1px solid var(--main-light); }
+  body.dark .notice-item{ background:#1e2a19; border-color:#3c5333; }
+  body.dark .notice-item.pinned{ background:var(--main-light); }
+
+  /* 문의 모달 */
+  .iq-ov{ position:fixed; inset:0; background:rgba(30,45,26,.42); display:none; align-items:center; justify-content:center; z-index:900; padding:16px; }
+  .iq-ov.show{ display:flex; }
+  .iq-modal{ background:var(--card); border-radius:24px; width:100%; max-width:420px; padding:26px; box-shadow:0 24px 70px rgba(30,50,26,.4); color:var(--text); }
+  .iq-title{ font-family:var(--round); font-size:22px; color:var(--main-dark); margin-bottom:3px; }
+  .iq-desc{ font-size:13px; color:var(--text-soft); margin-bottom:16px; }
+  .iq-input{ width:100%; padding:12px 14px; border-radius:13px; border:1.5px solid var(--main-light); font-size:14px; outline:none; margin-bottom:10px; font-family:inherit; background:var(--card); color:var(--text); }
+  .iq-input:focus{ border-color:var(--main); }
+  .iq-btns{ display:flex; gap:8px; margin-top:4px; }
+  .iq-btns button{ flex:1; padding:12px; border-radius:13px; border:none; font-size:14px; font-weight:800; cursor:pointer; font-family:var(--round); }
+  .iq-send{ background:var(--main); color:#fff; } .iq-cancel{ background:var(--main-light); color:var(--main-dark); }
+</style>
+</head>
+<body>
+<script>if(localStorage.getItem('theme')==='dark')document.body.classList.add('dark');</script>
+
+<div class="mag-sheet">
+<span class="mag-tape"></span>
+<header class="mag-mast">
+  <a href="../index.html" class="mag-wordmark"><span class="nm">모아</span><span class="mg">MAGAZINE</span></a>
+  <nav class="mag-nav">
+    <a href="../index.html">메인</a>
+    <a href="../profile/">프로필</a>
+    <a href="index.html" class="active">공지</a>
+    <a href="../schedule/">일정</a>
+    <a href="../work/">업보</a>
+    <a href="../dress/">옷장</a>
+    <a href="#" onclick="openInquiry();return false;">문의</a>
+  </nav>
+  <button class="mag-dk" id="themeSwitch" type="button" aria-label="다크모드"><span class="knob" id="themeKnob">🌙</span></button>
+</header>
+<div class="mag-rule"></div>
+<div class="mag-issue"><span><b>NOTICE</b></span><span>공지사항</span><span class="dday" id="dday">2026</span></div>
+
+<div class="container stagger">
+  <div class="page-title">📢 공지사항</div>
+  <div class="card">
+    <div class="notice-count" id="count"></div>
+    <div class="notice-list" id="notice-list"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<div class="mag-colophon">MOA MAGAZINE · NOTICE &nbsp;—&nbsp; © 2026 모아 (moa) Official · 문의 버튼을 이용해 주세요</div>
+</div>
+
+<!-- 문의 모달 -->
+<div class="iq-ov" id="iq-ov" onclick="if(event.target===this)closeInquiry()">
+  <div class="iq-modal">
+    <div class="iq-title">✉️ 문의하기</div>
+    <div class="iq-desc">모아에게 하고 싶은 말을 남겨주세요 🐸💚</div>
+    <input class="iq-input" id="iq-nick" placeholder="닉네임 (필수)">
+    <textarea class="iq-input" id="iq-msg" rows="4" placeholder="문의 내용을 적어주세요"></textarea>
+    <div class="iq-btns">
+      <button class="iq-cancel" onclick="closeInquiry()">취소</button>
+      <button class="iq-send" onclick="sendInquiry()">보내기 💚</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../supabase.js"></script>
+<script>
+  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  async function init(){
+    let data=[]; try{ data=await fetchAll('notice', { order:'created_at', asc:false }); }catch(e){}
+    const pinned=data.filter(n=>n.pinned), normal=data.filter(n=>!n.pinned);
+    const all=[...pinned,...normal];
+    const el=document.getElementById('notice-list');
+    document.getElementById('count').textContent = `총 ${all.length}개의 공지 🐸`;
+    if(!all.length){
+      el.innerHTML='<div class="empty"><div class="empty-icon">🐸</div>아직 공지사항이 없어요</div>';
+    } else {
+      el.innerHTML = all.map(n=>{
+        const d=new Date(n.created_at);
+        const ds=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+        const imgs=(n.images&&n.images.length)?n.images:(n.image_url?[n.image_url]:[]);
+        const thumb=imgs.length?`<img src="${esc(imgs[0])}" class="notice-thumb" referrerpolicy="no-referrer" loading="lazy" alt="">`:'';
+        return `
+        <div class="notice-item${n.pinned?' pinned':''}" onclick="this.classList.toggle('open')">
+          <div class="notice-header">
+            ${n.pinned?'<span class="notice-pin">📌 고정</span>':''}
+            <span class="notice-title">${esc(n.title)}</span>
+            ${thumb}
+            <span class="notice-date">${ds}</span>
+            <span class="notice-arrow">›</span>
+          </div>
+          <div class="notice-content">${imgs.map(u=>`<img src="${esc(u)}" class="post-img" referrerpolicy="no-referrer" loading="lazy" alt="">`).join('')}${esc(n.content||'').replace(/\n/g,'<br>')}</div>
+        </div>`;
+      }).join('');
+    }
+    document.body.classList.add('ready');
+    if (window.parent!==window && typeof initIframeResize==='function') setTimeout(initIframeResize, 300);
+  }
+  init();
+  setTimeout(function(){ document.body.classList.add('ready'); }, 1200);
+
+  // 문의
+  function openInquiry(){ document.getElementById('iq-ov').classList.add('show'); }
+  function closeInquiry(){ document.getElementById('iq-ov').classList.remove('show'); }
+  async function sendInquiry(){
+    var nick=document.getElementById('iq-nick').value.trim(); if(!nick){ alert('닉네임을 적어주세요'); return; }
+    var msg=document.getElementById('iq-msg').value.trim(); if(!msg){ alert('문의 내용을 적어주세요'); return; }
+    var ok=await insertRow('inquiries',{ nickname:nick, message:msg });
+    if(ok){ alert('문의가 전송됐어요! 💚'); document.getElementById('iq-nick').value=''; document.getElementById('iq-msg').value=''; closeInquiry(); }
+    else { alert('전송 실패 ㅠㅠ 잠시 후 다시 시도해주세요'); }
+  }
+
+  // 다크모드 토글
+  (function(){
+    var sw=document.getElementById('themeSwitch'), knob=document.getElementById('themeKnob');
+    function r(){ if(knob) knob.textContent=document.body.classList.contains('dark')?'☀️':'🌙'; }
+    if(sw) sw.addEventListener('click',function(){ document.body.classList.toggle('dark'); localStorage.setItem('theme',document.body.classList.contains('dark')?'dark':'light'); r(); }); r();
+  })();
+</script>
+<script src="../fx.js"></script>
+<script>
+  (function(){ var _dd=document.getElementById('dday'); if(_dd && typeof fxDday==='function'){ var _n=fxDday('11-28'); if(_n!==null) _dd.textContent=(_n===0?'오늘 생일! 🎉':'생일까지 D-'+_n+' 🎂'); } })();
+</script>
+</body>
+</html>

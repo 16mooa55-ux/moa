@@ -52,6 +52,7 @@
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('main',this)">🏠 메인</button>
       <button class="tab-btn" onclick="switchTab('profile',this)">🎀 프로필</button>
+      <button class="tab-btn" onclick="switchTab('notice',this)">📢 공지</button>
       <button class="tab-btn" onclick="switchTab('schedule',this)">📅 일정</button>
       <button class="tab-btn" onclick="switchTab('work',this)">⚡ 업보</button>
       <button class="tab-btn" onclick="switchTab('dress',this)">👗 옷장</button>
@@ -188,6 +189,24 @@
       <div class="form-field"><label class="input-label">♥ 버튼 URL</label><input class="input" id="f-link-heart" type="url" placeholder="https://"></div>
       <div class="form-field"><label class="input-label">코드 버튼 URL</label><input class="input" id="f-link-code" type="url" placeholder="https://"></div>
       <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="saveLocalProfile()">저장 ♥</button></div>
+    </div>
+  </div>
+
+  <!-- 공지 탭 -->
+  <div class="tab-panel" id="tab-notice">
+    <div class="card">
+      <div class="card-title">공지 추가</div>
+      <div class="form-field"><label class="input-label">제목 *</label><input class="input" id="noti-title"></div>
+      <div class="form-field"><label class="input-label">내용</label><textarea class="input" id="noti-content" rows="4"></textarea></div>
+      <div class="form-field"><label class="input-label">이미지 링크 (여러 개면 줄바꿈)</label><textarea id="noti-image-url" class="input" rows="2" placeholder="https://... (한 줄에 하나씩)"></textarea></div>
+      <div class="form-field full" style="font-size:11px;color:var(--text-soft);margin-top:-4px">💡 SOOP <b>비공개 게시판</b>에 이미지 올린 뒤 → 이미지 <b>우클릭 → "이미지 주소 복사"</b> → 위 칸에 붙여넣기 (글 주소 말고 이미지 주소)</div>
+      <div class="form-field"><label><input type="checkbox" id="noti-pin"> 📌 고정 공지</label></div>
+      <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="addNotice()">+ 추가</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">등록된 공지</div>
+      <div class="table-wrap"><table><thead><tr><th>제목</th><th>고정</th><th>날짜</th><th>삭제</th></tr></thead>
+      <tbody id="noti-list"><tr><td colspan="4"><div class="spinner"></div></td></tr></tbody></table></div>
     </div>
   </div>
 
@@ -388,7 +407,7 @@
       document.getElementById('loginOverlay').style.display = 'none';
       document.getElementById('adminBody').style.display = 'flex';
       loadProfileFields();
-      loadSchedule(); loadWork(); loadDress(); loadInquiry(); loadOriginalSongs(); loadContentLog();
+      loadNotice(); loadSchedule(); loadWork(); loadDress(); loadInquiry(); loadOriginalSongs(); loadContentLog();
     } else {
       document.getElementById('loginErr').textContent = '비밀번호가 틀렸어요 >﹏<';
     }
@@ -711,6 +730,24 @@
         <div style="font-size:14px;color:var(--text);white-space:pre-wrap;line-height:1.5">${(q.message||'').replace(/</g,'&lt;')}</div>
         <div style="text-align:right;margin-top:8px"><button class="delete-btn" onclick="del('inquiries',${q.id},loadInquiry)">🗑 삭제</button></div>
       </div>`).join('');
+  }
+
+  // ── 공지 ──
+  async function loadNotice() {
+    const data = await fetchAll('notice', { order:'created_at', asc:false });
+    const t = document.getElementById('noti-list');
+    if (!t) return;
+    if (!data.length) { t.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);padding:14px">공지 없음</td></tr>'; return; }
+    t.innerHTML = data.map(n => `<tr><td>${(n.title||'').replace(/</g,'&lt;')}</td><td>${n.pinned?'📌':'-'}</td><td>${new Date(n.created_at).toLocaleDateString()}</td><td><button class="delete-btn" onclick="del('notice',${n.id},loadNotice)">🗑</button></td></tr>`).join('');
+  }
+  async function addNotice() {
+    const title = document.getElementById('noti-title').value.trim();
+    if (!title) { showToast('❗ 제목 필수!'); return; }
+    const images = document.getElementById('noti-image-url').value.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+    const image_url = images[0] || null;
+    const ok = await insertRow('notice', { title, content: document.getElementById('noti-content').value, pinned: document.getElementById('noti-pin').checked, image_url, images });
+    if (ok) { showToast('✅ 추가!'); ['noti-title','noti-content','noti-image-url'].forEach(id=>document.getElementById(id).value=''); document.getElementById('noti-pin').checked=false; loadNotice(); }
+    else showToast('❌ 실패');
   }
 
   // ── 진행한 컨텐츠 ──
